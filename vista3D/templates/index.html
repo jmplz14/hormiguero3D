@@ -5,21 +5,8 @@
     <link rel="stylesheet" href="{% static 'css/blog.css' %}">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    
-
-    <!---<script type="text/javascript" src="{{ STATIC_URL }} /static/jquery-3.4.1.min.js">
-    </script>
-    
-    <script>
-        let Three_file = "{% static 'threejs/three.module.js' %}";
-        let OrbitControls_file ="{% static 'threejs/OrbitControls.js' %}";
-        let STTLLoader_file = "{% static 'threejs/STLLoader.js' %}";
-        let Loader3MF_file = "{% static 'threejs/3MFLoader.js' %}";
-        
-    </script>-->
-
     <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
-    <script type="module" src="{% static 'javascript/index.js' %}"></script>
+    {% block scripts %} {% endblock %}
 </head>
 
 <body>
