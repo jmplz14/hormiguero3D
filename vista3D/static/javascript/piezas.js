@@ -3,116 +3,13 @@ import { OrbitControls } from "/static/threejs/OrbitControls.js";
 import { STLLoader } from "/static/threejs/STLLoader.js";
 
 
-
-/*let scene, camera, renderer, object, canvas, raycaster;
-let INTERSECTED;
-const pointer = new THREE.Vector2();
-
-function init() {
-
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xffffff);
-    scene.fog = new THREE.Fog(0xffffff, 0, 500);
-    //scene.add(new THREE.GridHelper(10000, 1000));
-
-   
- 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-    camera.position.z = 20;
-    renderer = new THREE.WebGLRenderer();
-    raycaster = new THREE.Raycaster();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById('contenido').appendChild(renderer.domElement);
-    canvas = document.querySelector("canvas")
-    $("canvas").dblclick(function (e) {
-        getMousePosition(e);
-    });
-    
-    scene.add(object);
-
-    let control = new OrbitControls(camera, renderer.domElement);
-
-    let light = new THREE.DirectionalLight(0xaaaaaa);
-    light.position.set(0, 0, 10);
-    scene.add(light);
-
-    let light2 = new THREE.DirectionalLight(0xaaaaaa);
-    light2.position.set(0, 0, -10);
-    scene.add(light2);
-    let light3 = new THREE.AmbientLight(0xaaaaaa); // soft white light
-    scene.add(light3);
-    animate();
-
-}
-function animate() {
-    requestAnimationFrame(animate);
-    //object.rotation.y += 0.01;
-    renderer.render(scene, camera);
-}
-
-let loader = new STLLoader();
-loader.load("/static/3dmodels/bases/BF3_mod_f4_foot_L_v0100.stl", (model) => {
-    object = new THREE.Mesh(model, new THREE.MeshLambertMaterial({ color: 0x00ff00 }));
-    object.scale.set(0.1, 0.1, 0.1);
-    object.position.set(3, -2, 0);
-    init();
-});
-
-
-    
-
-function getMousePosition(event) {
-    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
-    raycaster.setFromCamera(pointer, camera);
-    const intersects = raycaster.intersectObjects(scene.children);
-    if (intersects.length > 0) {
-        alert("Hola");
-
-        if (INTERSECTED != intersects[0].object) {
-
-            if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-
-            INTERSECTED = intersects[0].object;
-            INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-            INTERSECTED.material.emissive.setHex(0xff0000);
-
-        }
-
-    } else {
-        alert("Adios");
-        if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-
-        INTERSECTED = null;
-
-    }
-
-    renderer.render(scene, camera);
-}
-function getMousePosition(event) {
-
-    var vec = new THREE.Vector3(); // create once and reuse
-    var pos = new THREE.Vector3(); // create once and reuse
-    vec.set(
-        (event.clientX / window.innerWidth) * 2 - 1,
-        - (event.clientY / window.innerHeight) * 2 + 1,
-        0.5);
-    vec.unproject(camera);
-    vec.sub(camera.position).normalize();
-    var distance = - camera.position.z / vec.z;
-    pos.copy(camera.position).add(vec.multiplyScalar(distance));
-    console.log(pos);
-    object.position.set(pos.x, pos.y, pos.z);
-
-    scene.add(object);
-    renderer.render(scene, camera);
-    return pos
-}*/
 let scene;
-let modelos = new Array(39);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 300);
 camera.position.z = 100;
 camera.position.y = 30
+let idSelectedObject = -1;
+let numberObject = 41;
+let idsObjects = new Array(numberObject)
 
 
 main();
@@ -121,10 +18,11 @@ main();
 function cargarSTL(position, loader, material, coordenadas, file) {
     loader.load(file, (model) => {
         //console.log(position);
-        modelos[position] = new THREE.Mesh(model, material);
-        modelos[position].scale.set(0.2, 0.2, 0.2);
-        modelos[position].position.set(coordenadas.x, coordenadas.y, coordenadas.z);
-        scene.add(modelos[position]);
+        var modelo = new THREE.Mesh(model, material);
+        modelo.scale.set(0.2, 0.2, 0.2);
+        modelo.position.set(coordenadas.x, coordenadas.y, coordenadas.z);
+        scene.add(modelo);
+        idsObjects[position] =  modelo.id;
     });
 }
 
@@ -195,42 +93,48 @@ function main() {
     function getCenterPoint(objeto) {
         var middle = new THREE.Vector3();
         var geometry = objeto.geometry;
-    
+
         geometry.computeBoundingBox();
-    
+
         middle.x = (geometry.boundingBox.max.x + geometry.boundingBox.min.x) / 2;
         middle.y = (geometry.boundingBox.max.y + geometry.boundingBox.min.y) / 2;
         middle.z = (geometry.boundingBox.max.z + geometry.boundingBox.min.z) / 2;
-    
-        objeto.localToWorld( middle );
+
+        objeto.localToWorld(middle);
         return middle;
     }
 
-    function hideObjects(id) {
-        var i = 0;
+    function showOnlyIdObject(id) {
+        
         scene.traverse(function (node) {
 
             if (node instanceof THREE.Mesh) {
                 if (node.id !== id) {
+                    
                     node.visible = false;
+                }else{
+                    node.visible = true;
                 }
 
             }
 
         });
-        alert(i);
+        
     }
-    function moveCamera(object, camera) {
+    function moveCamera(object) {
         var middle = getCenterPoint(object);
         camera.position.x = object.position.x;
         camera.position.y = object.position.y;
         camera.position.z = 50;
 
-        control.target.set(middle.x,middle.y, middle.z);
+        control.target.set(middle.x, middle.y, middle.z);
         control.update();
         
-        hideObjects(object.id);
-        
+        idSelectedObject = object.id;
+        showOnlyIdObject(object.id);
+        /*for (var i = 0; i< numberObject; i++){
+            console.log(idsObjects[i] + " " +i);
+        }*/
         /*const geometry = new THREE.SphereGeometry(5, 32, 32);
         const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
         const sphere = new THREE.Mesh(geometry, material);
@@ -288,18 +192,18 @@ function main() {
     cargarSTL(29, loader, materialSTL, new THREE.Vector3(-55, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_pal_C_v0100.stl");
     cargarSTL(30, loader, materialSTL, new THREE.Vector3(-75, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_pal_L_v0110.stl");
     cargarSTL(31, loader, materialSTL, new THREE.Vector3(-95, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_pal_R_v0110.stl");
-    cargarSTL(31, loader, materialSTL, new THREE.Vector3(75, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_v0100.stl");
+    cargarSTL(32, loader, materialSTL, new THREE.Vector3(75, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_v0100.stl");
     //tapasCierre
-    cargarSTL(32, loader, materialSTL, new THREE.Vector3(-87, 20, 0), "/static/3dmodels/tapasCierre/BF3_module_c1_camp_L_v0100.stl");
-    cargarSTL(33, loader, materialSTL, new THREE.Vector3(-95, 20, 0), "/static/3dmodels/tapasCierre/BF3_module_c1_camp_R_v0100.stl");
+    cargarSTL(33, loader, materialSTL, new THREE.Vector3(-87, 20, 0), "/static/3dmodels/tapasCierre/BF3_module_c1_camp_L_v0100.stl");
+    cargarSTL(34, loader, materialSTL, new THREE.Vector3(-95, 20, 0), "/static/3dmodels/tapasCierre/BF3_module_c1_camp_R_v0100.stl");
 
     //tuercas
-    cargarSTL(34, loader, materialSTL, new THREE.Vector3(10, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n1a_nut_A_type1_v0100.stl");
-    cargarSTL(35, loader, materialSTL, new THREE.Vector3(20, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n1b_nut_B_type1_v0100.stl");
-    cargarSTL(36, loader, materialSTL, new THREE.Vector3(0, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n2a_nut_A_type2_v0100.stl");
-    cargarSTL(37, loader, materialSTL, new THREE.Vector3(-10, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n2b_nut_B_type2_v0100.stl");
-    cargarSTL(38, loader, materialSTL, new THREE.Vector3(30, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n3a_nut_A_type3_v0100.stl");
-    cargarSTL(39, loader, materialSTL, new THREE.Vector3(40, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n3b_nut_B_type3_v0100.stl");
+    cargarSTL(35, loader, materialSTL, new THREE.Vector3(10, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n1a_nut_A_type1_v0100.stl");
+    cargarSTL(36, loader, materialSTL, new THREE.Vector3(20, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n1b_nut_B_type1_v0100.stl");
+    cargarSTL(37, loader, materialSTL, new THREE.Vector3(0, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n2a_nut_A_type2_v0100.stl");
+    cargarSTL(38, loader, materialSTL, new THREE.Vector3(-10, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n2b_nut_B_type2_v0100.stl");
+    cargarSTL(39, loader, materialSTL, new THREE.Vector3(30, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n3a_nut_A_type3_v0100.stl");
+    cargarSTL(40, loader, materialSTL, new THREE.Vector3(40, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n3b_nut_B_type3_v0100.stl");
 
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
@@ -356,6 +260,31 @@ function main() {
         pickPosition.x = -100000;
         pickPosition.y = -100000;
     }
+
+
+
+
+
+    function changeObject(page) {
+        
+        if (idSelectedObject !== -1) {
+            var posNextId = (jQuery.inArray(idSelectedObject, idsObjects) + page ) % numberObject ;
+            idSelectedObject = idsObjects[posNextId];
+            
+            var object = scene.getObjectById(idSelectedObject, true);
+            moveCamera(object);
+        }
+    }
+    function nextObject() {
+        changeObject(1);
+    }
+    function previousObject() {
+        changeObject(-1);
+    }
+
+    
+
+
     window.addEventListener('mousemove', setPickPosition);
     window.addEventListener('mouseout', clearPickPosition);
     window.addEventListener('mouseleave', clearPickPosition);
@@ -371,6 +300,14 @@ function main() {
     });
 
     window.addEventListener('touchend', clearPickPosition);
+    $("#next").click(function () {
+        nextObject();
+    });
+
+    $("#previous").click(function () {
+        previousObject();
+    });
+
 }
 
 
