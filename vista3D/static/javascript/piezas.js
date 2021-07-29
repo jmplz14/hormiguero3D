@@ -4,6 +4,7 @@ import { STLLoader } from "/static/threejs/STLLoader.js";
 
 
 let scene;
+const vectorCamera = new THREE.Vector3( 0, 30, 100 )
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 300);
 camera.position.z = 100;
 camera.position.y = 30
@@ -22,7 +23,7 @@ function cargarSTL(position, loader, material, coordenadas, file) {
         modelo.scale.set(0.2, 0.2, 0.2);
         modelo.position.set(coordenadas.x, coordenadas.y, coordenadas.z);
         scene.add(modelo);
-        idsObjects[position] =  modelo.id;
+        idsObjects[position] = modelo.id;
     });
 }
 
@@ -34,10 +35,10 @@ function main() {
 
     const renderer = new THREE.WebGLRenderer({ canvas });
 
-    const fov = 60;
+    /*const fov = 60;
     const aspect = 2;  // the canvas default
     const near = 0.1;
-    const far = 200;
+    const far = 200;*/
 
 
     scene = new THREE.Scene();
@@ -45,9 +46,8 @@ function main() {
 
     // put the camera on a pole (parent it to an object)
     // so we can spin the pole to move the camera around the scene
-    const cameraPole = new THREE.Object3D();
-    scene.add(cameraPole);
-    cameraPole.add(camera);
+    scene.add(camera);
+
 
     const control = new OrbitControls(camera, renderer.domElement);
 
@@ -105,42 +105,61 @@ function main() {
     }
 
     function showOnlyIdObject(id) {
-        
+
         scene.traverse(function (node) {
 
             if (node instanceof THREE.Mesh) {
                 if (node.id !== id) {
-                    
+
                     node.visible = false;
-                }else{
+                } else {
                     node.visible = true;
                 }
 
             }
 
         });
-        
+
+    }
+
+    function showAllObject() {
+
+        scene.traverse(function (node) {
+
+            if (node instanceof THREE.Mesh) {
+                node.visible = true;
+            }
+
+        });
+
+    }
+
+    function changeCameraAndControl(posCamera, posControl){
+        camera.position.set(posCamera.x, posCamera.y, posCamera.z );
+        control.target.set(posControl.x, posControl.y, posControl.z);
+        control.update();
+        render();
+    }
+    function returnFullView() {
+        idSelectedObject = -1;
+        showAllObject();
+        var posControl = new THREE.Vector3(0,0,0);
+        changeCameraAndControl(vectorCamera,posControl);    
     }
     function moveCamera(object) {
         var middle = getCenterPoint(object);
-        camera.position.x = object.position.x;
-        camera.position.y = object.position.y;
+        var posCamera = new THREE.Vector3(middle.x,middle.y,50);
+        /*camera.position.x = middle.x;
+        camera.position.y = middle.y;
         camera.position.z = 50;
 
         control.target.set(middle.x, middle.y, middle.z);
-        control.update();
-        
+        control.update();*/
+        changeCameraAndControl(posCamera,middle);
         idSelectedObject = object.id;
         showOnlyIdObject(object.id);
-        /*for (var i = 0; i< numberObject; i++){
-            console.log(idsObjects[i] + " " +i);
-        }*/
-        /*const geometry = new THREE.SphereGeometry(5, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-        const sphere = new THREE.Mesh(geometry, material);
-        sphere.position.set(middle.x,middle.y, middle.z);
-        scene.add(sphere);*/
-        render();
+
+        //render();
     }
 
 
@@ -266,11 +285,11 @@ function main() {
 
 
     function changeObject(page) {
-        
+
         if (idSelectedObject !== -1) {
-            var posNextId = (jQuery.inArray(idSelectedObject, idsObjects) + page ) % numberObject ;
+            var posNextId = (jQuery.inArray(idSelectedObject, idsObjects) + page) % numberObject;
             idSelectedObject = idsObjects[posNextId];
-            
+
             var object = scene.getObjectById(idSelectedObject, true);
             moveCamera(object);
         }
@@ -282,7 +301,7 @@ function main() {
         changeObject(-1);
     }
 
-    
+
 
 
     window.addEventListener('mousemove', setPickPosition);
@@ -306,6 +325,9 @@ function main() {
 
     $("#previous").click(function () {
         previousObject();
+    });
+    $("#backHome").click(function () {
+        returnFullView();
     });
 
 }
