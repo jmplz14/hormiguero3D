@@ -4,7 +4,7 @@ import { STLLoader } from "/static/threejs/STLLoader.js";
 
 
 let scene;
-const vectorCamera = new THREE.Vector3( 0, 30, 100 )
+const vectorCameraPosInit = new THREE.Vector3(0, 30, 100)
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 300);
 camera.position.z = 100;
 camera.position.y = 30
@@ -86,7 +86,7 @@ function main() {
                 this.pickedObjectSavedColor = this.pickedObject.material.emissive.getHex();
                 // set its emissive color to flashing red/yellow
                 this.pickedObject.material.emissive.setHex((time * 8) % 2 > 1 ? 0xFFFF00 : 0xFF0000);*/
-                moveCamera(this.pickedObject, camera);
+                moveCameraToObject(this.pickedObject, camera);
             }
         }
     }
@@ -134,32 +134,37 @@ function main() {
 
     }
 
-    function changeCameraAndControl(posCamera, posControl){
-        camera.position.set(posCamera.x, posCamera.y, posCamera.z );
+    function changeCameraAndControl(posCamera, posControl) {
+        camera.position.set(posCamera.x, posCamera.y, posCamera.z);
         control.target.set(posControl.x, posControl.y, posControl.z);
         control.update();
         render();
     }
-    function returnFullView() {
-        idSelectedObject = -1;
-        showAllObject();
-        var posControl = new THREE.Vector3(0,0,0);
-        changeCameraAndControl(vectorCamera,posControl);    
-    }
-    function moveCamera(object) {
-        var middle = getCenterPoint(object);
-        var posCamera = new THREE.Vector3(middle.x,middle.y,50);
-        /*camera.position.x = middle.x;
-        camera.position.y = middle.y;
-        camera.position.z = 50;
 
-        control.target.set(middle.x, middle.y, middle.z);
-        control.update();*/
-        changeCameraAndControl(posCamera,middle);
+    function moveCameraToInit(){
+        var posControl = new THREE.Vector3(0, 0, 0);
+        changeCameraAndControl(vectorCameraPosInit, posControl);
+    }
+
+    function returnFullView() {
+        if (idSelectedObject === -1) {
+            idSelectedObject = -1;
+            showAllObject();
+            var posControl = new THREE.Vector3(0, 0, 0);
+            moveCameraToInit();
+        }
+
+    }
+
+    function moveCameraToObject(object) {
+        var middle = getCenterPoint(object);
+        var posCamera = new THREE.Vector3(middle.x, middle.y, 50);
+
+        changeCameraAndControl(posCamera, middle);
         idSelectedObject = object.id;
         showOnlyIdObject(object.id);
 
-        //render();
+       
     }
 
 
@@ -291,7 +296,7 @@ function main() {
             idSelectedObject = idsObjects[posNextId];
 
             var object = scene.getObjectById(idSelectedObject, true);
-            moveCamera(object);
+            moveCameraToObject(object);
         }
     }
     function nextObject() {
@@ -299,6 +304,16 @@ function main() {
     }
     function previousObject() {
         changeObject(-1);
+    }
+
+    function resetCameraPosition() {
+        alert("hola");
+        if (idSelectedObject !== -1) {
+            var object = scene.getObjectById(idSelectedObject, true);
+            moveCameraToObject(object);
+        } else {
+            moveCameraToInit();
+        }
     }
 
 
@@ -328,6 +343,9 @@ function main() {
     });
     $("#backHome").click(function () {
         returnFullView();
+    });
+    $("#resetCamera").click(function () {
+        resetCameraPosition();
     });
 
 }
