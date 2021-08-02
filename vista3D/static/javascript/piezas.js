@@ -1,15 +1,18 @@
 import * as THREE from "/static/threejs/three.module.js";
 import { OrbitControls } from "/static/threejs/OrbitControls.js";
+import { TransformControls } from '/static/threejs/TransformControls.js';
 import { STLLoader } from "/static/threejs/STLLoader.js";
 
 
 let scene;
-const vectorCameraPosInit = new THREE.Vector3(0, 30, 100)
+let scaledMode = false;
+const vectorCameraPosInit = new THREE.Vector3(0, 30, 100);
+const vectorScaleInit = new THREE.Vector3(0.2, 0.2, 0.2);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 300);
 camera.position.z = 100;
 camera.position.y = 30
 let idSelectedObject = -1;
-let numberObject = 41;
+let numberObject = objects.length;
 let idsObjects = new Array(numberObject)
 
 
@@ -20,7 +23,7 @@ function cargarSTL(position, loader, material, coordenadas, file) {
     loader.load(file, (model) => {
         //console.log(position);
         var modelo = new THREE.Mesh(model, material);
-        modelo.scale.set(0.2, 0.2, 0.2);
+        modelo.scale.set(vectorScaleInit.x, vectorScaleInit.y, vectorScaleInit.z);
         modelo.position.set(coordenadas.x, coordenadas.y, coordenadas.z);
         scene.add(modelo);
         idsObjects[position] = modelo.id;
@@ -31,6 +34,7 @@ function cargarSTL(position, loader, material, coordenadas, file) {
 
 
 function main() {
+ 
     const canvas = document.querySelector('canvas');
 
     const renderer = new THREE.WebGLRenderer({ canvas });
@@ -51,12 +55,20 @@ function main() {
 
     const control = new OrbitControls(camera, renderer.domElement);
 
+    const transformControl = new TransformControls(camera, renderer.domElement);
+    transformControl.addEventListener('change', render);
+    transformControl.addEventListener('dragging-changed', function (event) {
 
+        control.enabled = !event.value;
+
+    });
+    scene.add(transformControl);
     const color = 0xFFFFFF;
     const intensity = 1;
     const light = new THREE.DirectionalLight(color, intensity);
     light.position.set(-1, 2, 4);
     camera.add(light);
+
     const loader = new STLLoader();
     const materialSTL = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 
@@ -141,30 +153,42 @@ function main() {
         render();
     }
 
-    function moveCameraToInit(){
+    function moveCameraToInit() {
         var posControl = new THREE.Vector3(0, 0, 0);
         changeCameraAndControl(vectorCameraPosInit, posControl);
     }
 
     function returnFullView() {
-        if (idSelectedObject === -1) {
+        if (idSelectedObject !== -1) {
             idSelectedObject = -1;
             showAllObject();
-            var posControl = new THREE.Vector3(0, 0, 0);
             moveCameraToInit();
         }
+        
+        deScaleMode();
+        
 
     }
 
     function moveCameraToObject(object) {
         var middle = getCenterPoint(object);
         var posCamera = new THREE.Vector3(middle.x, middle.y, 50);
-
+        
+        
+        
         changeCameraAndControl(posCamera, middle);
         idSelectedObject = object.id;
         showOnlyIdObject(object.id);
+        /*var box = new THREE.BoxHelper( object, 0x000000 );
+        scene.add(box);*/
+        /*const geometry = new THREE.SphereGeometry( 2, 32, 16 );
+        const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+        const sphere = new THREE.Mesh( geometry, material );
+        sphere.position.set(middle.x, middle.y, middle.z);
 
-       
+        scene.add( sphere );*/
+
+
     }
 
 
@@ -175,7 +199,8 @@ function main() {
     });
     clearPickPosition();
 
-    //bases
+    objects.forEach(element => cargarSTL(element[0], loader, materialSTL, new THREE.Vector3(element[3], element[4], 0), element[1]));
+    /*//bases
     cargarSTL(0, loader, materialSTL, new THREE.Vector3(50, 0, 0), "/static/3dmodels/bases/BF3_mod_f4_foot_L_v0100.stl");
     cargarSTL(1, loader, materialSTL, new THREE.Vector3(40, 0, 0), "/static/3dmodels/bases/BF3_mod_f4_foot_R_v0100.stl");
     cargarSTL(2, loader, materialSTL, new THREE.Vector3(32, 0, 0), "/static/3dmodels/bases/BF3_module_c3_camp_bot_v0100.stl");
@@ -191,7 +216,7 @@ function main() {
     cargarSTL(10, loader, materialSTL, new THREE.Vector3(40, 13, 0), "/static/3dmodels/conexiones/BF3_module_e1_elev_v0100.stl");
     cargarSTL(11, loader, materialSTL, new THREE.Vector3(20, 20, 0), "/static/3dmodels/conexiones/BF3_module_e1_c_elev_v0100.stl");
     cargarSTL(12, loader, materialSTL, new THREE.Vector3(10, 20, 0), "/static/3dmodels/conexiones/BF3_module_c2_camp_out_R_v0100.stl");
-    cargarSTL(13, loader, materialSTL, new THREE.Vector3(-0, 20, 0), "/static/3dmodels/conexiones/BF3_module_c2_camp_out_L_v0100.stl");
+    cargarSTL(13, loader, materialSTL, new THREE.Vector3(0, 20, 0), "/static/3dmodels/conexiones/BF3_module_c2_camp_out_L_v0100.stl");
     cargarSTL(14, loader, materialSTL, new THREE.Vector3(-10, 20, 0), "/static/3dmodels/conexiones/BF3_module_a1_angle_20_v0100.stl");
     cargarSTL(15, loader, materialSTL, new THREE.Vector3(-20, 20, 0), "/static/3dmodels/conexiones/BF3_mod_c2f_camp_out_front_R_v0100.stl");
     cargarSTL(16, loader, materialSTL, new THREE.Vector3(-30, 20, 0), "/static/3dmodels/conexiones/BF3_mod_c2_camp_out_08mm_R_v0100.stl");
@@ -228,7 +253,7 @@ function main() {
     cargarSTL(38, loader, materialSTL, new THREE.Vector3(-10, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n2b_nut_B_type2_v0100.stl");
     cargarSTL(39, loader, materialSTL, new THREE.Vector3(30, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n3a_nut_A_type3_v0100.stl");
     cargarSTL(40, loader, materialSTL, new THREE.Vector3(40, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n3b_nut_B_type3_v0100.stl");
-
+    */
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
         const width = canvas.clientWidth;
@@ -293,10 +318,14 @@ function main() {
 
         if (idSelectedObject !== -1) {
             var posNextId = (jQuery.inArray(idSelectedObject, idsObjects) + page) % numberObject;
+            posNextId = (posNextId + numberObject) % numberObject;
+
             idSelectedObject = idsObjects[posNextId];
 
             var object = scene.getObjectById(idSelectedObject, true);
             moveCameraToObject(object);
+            deScaleMode();
+
         }
     }
     function nextObject() {
@@ -307,7 +336,6 @@ function main() {
     }
 
     function resetCameraPosition() {
-        alert("hola");
         if (idSelectedObject !== -1) {
             var object = scene.getObjectById(idSelectedObject, true);
             moveCameraToObject(object);
@@ -316,6 +344,36 @@ function main() {
         }
     }
 
+    function deScaleMode() {
+        if (transformControl.object !== undefined) {
+            $("#escaleObject").attr('class', 'escale');
+
+            transformControl.object.scale.set(vectorScaleInit.x, vectorScaleInit.y, vectorScaleInit.z);
+            transformControl.detach();
+        }
+
+
+
+    }
+    function scaleObject() {
+
+        if (idSelectedObject !== -1) {
+            if (transformControl.object === undefined) {
+                var object = scene.getObjectById(idSelectedObject, true);
+                transformControl.attach(object);
+                transformControl.setMode('scale');
+                $("#escaleObject").attr('class', 'de-escale');
+                
+            } else {
+
+                deScaleMode();
+
+
+            }
+        }
+
+
+    }
 
 
 
@@ -347,6 +405,11 @@ function main() {
     $("#resetCamera").click(function () {
         resetCameraPosition();
     });
+
+    $("#escaleObject").click(function () {
+        scaleObject();
+    });
+
 
 }
 
