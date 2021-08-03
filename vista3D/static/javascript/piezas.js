@@ -12,21 +12,23 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 camera.position.z = 100;
 camera.position.y = 30
 let idSelectedObject = -1;
-let numberObject = objects.length;
-let idsObjects = new Array(numberObject)
+let numberObjects = objects.length;
+let idsObjects = new Array(numberObjects)
+let dataObjects = new Array(numberObjects)
 
 
 main();
 
 
-function cargarSTL(position, loader, material, coordenadas, file) {
-    loader.load(file, (model) => {
-        //console.log(position);
+
+function cargarSTL(position, loader, material, dataObject) {
+    loader.load(dataObject.nameFile, (model) => {
         var modelo = new THREE.Mesh(model, material);
         modelo.scale.set(vectorScaleInit.x, vectorScaleInit.y, vectorScaleInit.z);
-        modelo.position.set(coordenadas.x, coordenadas.y, coordenadas.z);
+        modelo.position.set(dataObject.posX, dataObject.posY, 0);
         scene.add(modelo);
         idsObjects[position] = modelo.id;
+        dataObjects[position] = dataObject;
     });
 }
 
@@ -102,6 +104,18 @@ function main() {
             }
         }
     }
+
+    class dataObject{
+        constructor(data){
+            this.id = data[0];
+            this.nameFile = data[1];
+            this.size = data[2];
+            this.posX = data[3];
+            this.posY = data[4];
+            this.tipo = data[5]; 
+        }
+    }
+
     function getCenterPoint(objeto) {
         var middle = new THREE.Vector3();
         var geometry = objeto.geometry;
@@ -194,12 +208,18 @@ function main() {
 
     const pickPosition = { x: 0, y: 0 };
     const pickHelper = new PickHelper();
+
     $("canvas").dblclick(function (e) {
         pickHelper.pick(pickPosition, scene, camera, 1);
     });
     clearPickPosition();
 
-    objects.forEach(element => cargarSTL(element[0], loader, materialSTL, new THREE.Vector3(element[3], element[4], 0), element[1]));
+    for (var i = 0; i < numberObjects; i++){
+        var datos = new dataObject(objects[i]);
+        cargarSTL(i, loader, materialSTL, datos);
+    }
+    
+    //objects.forEach(element => cargarSTL(element[0], loader, materialSTL, new THREE.Vector3(element[3], element[4], 0), element[1]));
     /*//bases
     cargarSTL(0, loader, materialSTL, new THREE.Vector3(50, 0, 0), "/static/3dmodels/bases/BF3_mod_f4_foot_L_v0100.stl");
     cargarSTL(1, loader, materialSTL, new THREE.Vector3(40, 0, 0), "/static/3dmodels/bases/BF3_mod_f4_foot_R_v0100.stl");
@@ -317,8 +337,8 @@ function main() {
     function changeObject(page) {
 
         if (idSelectedObject !== -1) {
-            var posNextId = (jQuery.inArray(idSelectedObject, idsObjects) + page) % numberObject;
-            posNextId = (posNextId + numberObject) % numberObject;
+            var posNextId = (jQuery.inArray(idSelectedObject, idsObjects) + page) % numberObjects;
+            posNextId = (posNextId + numberObjects) % numberObjects;
 
             idSelectedObject = idsObjects[posNextId];
 
