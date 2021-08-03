@@ -13,9 +13,9 @@ camera.position.z = 100;
 camera.position.y = 30
 let idSelectedObject = -1;
 let numberObjects = objects.length;
-let idsObjects = new Array(numberObjects)
-let dataObjects = new Array(numberObjects)
-
+let idsObjects = new Array(numberObjects);
+let dataObjects = new Array(numberObjects);
+let elementInfo = $("#infoObject");
 
 main();
 
@@ -36,7 +36,7 @@ function cargarSTL(position, loader, material, dataObject) {
 
 
 function main() {
- 
+
     const canvas = document.querySelector('canvas');
 
     const renderer = new THREE.WebGLRenderer({ canvas });
@@ -80,10 +80,12 @@ function main() {
             this.pickedObject = null;
             this.pickedObjectSavedColor = 0;
         }
-        pick(normalizedPosition, scene, camera, time) {
+        isInside(normalizedPosition, scene, camera, time) {
+            var inInside = false
+
             // restore the color if there is a picked object
             if (this.pickedObject) {
-                this.pickedObject.material.emissive.setHex(this.pickedObjectSavedColor);
+                //this.pickedObject.material.emissive.setHex(this.pickedObjectSavedColor);
                 this.pickedObject = undefined;
             }
 
@@ -92,27 +94,63 @@ function main() {
             // get the list of objects the ray intersected
             const intersectedObjects = this.raycaster.intersectObjects(scene.children);
             if (intersectedObjects.length) {
-                this.pickedObject = intersectedObjects[0].object;
+                if (intersectedObjects[0].object.visible) {
+                    this.pickedObject = intersectedObjects[0].object;
 
-                /*// pick the first object. It's the closest one
-                this.pickedObject = intersectedObjects[0].object;
-                // save its color
-                this.pickedObjectSavedColor = this.pickedObject.material.emissive.getHex();
-                // set its emissive color to flashing red/yellow
-                this.pickedObject.material.emissive.setHex((time * 8) % 2 > 1 ? 0xFFFF00 : 0xFF0000);*/
+                    /*// pick the first object. It's the closest one
+                    this.pickedObject = intersectedObjects[0].object;
+                    // save its color
+                    this.pickedObjectSavedColor = this.pickedObject.material.emissive.getHex();
+                    // set its emissive color to flashing red/yellow
+                    this.pickedObject.material.emissive.setHex((time * 8) % 2 > 1 ? 0xFFFF00 : 0xFF0000);*/
+                    inInside = true;
+                }
+
+
+            }
+            return inInside;
+        }
+        pickClicker(normalizedPosition, scene, camera, time) {
+            if (this.isInside(normalizedPosition, scene, camera, time)) {
                 moveCameraToObject(this.pickedObject, camera);
             }
         }
+        pickMouseOver(normalizedPosition, scene, camera, time) {
+            if(idSelectedObject === -1 ){
+                if (this.isInside(normalizedPosition, scene, camera, time)) {
+                    console.log();
+                    if(elementInfo.text() === ""){
+                        showInfoObject(this.pickedObject.id)
+                    }
+                        
+                }else{
+                    if(elementInfo.text() !== ""){
+                        clearInfoObject();
+                    }
+                }
+            }
+            
+
+        }
     }
 
-    class dataObject{
-        constructor(data){
+    class dataObject {
+        constructor(data) {
             this.id = data[0];
             this.nameFile = data[1];
             this.size = data[2];
             this.posX = data[3];
             this.posY = data[4];
-            this.tipo = data[5]; 
+            this.tipo = data[5];
+        }
+
+        getInfo() {
+            var splitName = this.nameFile.split("/");
+            var numSplit = splitName.length;
+            var file = splitName[numSplit - 1];
+            var info = "Nombre: " + file + "</br> ";
+            info += "Tamaño: " + this.size;
+            return info;
         }
     }
 
@@ -176,23 +214,26 @@ function main() {
         if (idSelectedObject !== -1) {
             idSelectedObject = -1;
             showAllObject();
+            clearInfoObject();
             moveCameraToInit();
+
         }
-        
+
         deScaleMode();
-        
+
 
     }
 
     function moveCameraToObject(object) {
         var middle = getCenterPoint(object);
         var posCamera = new THREE.Vector3(middle.x, middle.y, 50);
-        
-        
-        
+
+
+
         changeCameraAndControl(posCamera, middle);
         idSelectedObject = object.id;
         showOnlyIdObject(object.id);
+        showInfoObject(object.id);
         /*var box = new THREE.BoxHelper( object, 0x000000 );
         scene.add(box);*/
         /*const geometry = new THREE.SphereGeometry( 2, 32, 16 );
@@ -210,70 +251,19 @@ function main() {
     const pickHelper = new PickHelper();
 
     $("canvas").dblclick(function (e) {
-        pickHelper.pick(pickPosition, scene, camera, 1);
+        pickHelper.pickClicker(pickPosition, scene, camera, 1);
+    });
+    $("canvas").mousemove(function (e) {
+        pickHelper.pickMouseOver(pickPosition, scene, camera, 1);
     });
     clearPickPosition();
 
-    for (var i = 0; i < numberObjects; i++){
+    for (var i = 0; i < numberObjects; i++) {
         var datos = new dataObject(objects[i]);
         cargarSTL(i, loader, materialSTL, datos);
     }
-    
-    //objects.forEach(element => cargarSTL(element[0], loader, materialSTL, new THREE.Vector3(element[3], element[4], 0), element[1]));
-    /*//bases
-    cargarSTL(0, loader, materialSTL, new THREE.Vector3(50, 0, 0), "/static/3dmodels/bases/BF3_mod_f4_foot_L_v0100.stl");
-    cargarSTL(1, loader, materialSTL, new THREE.Vector3(40, 0, 0), "/static/3dmodels/bases/BF3_mod_f4_foot_R_v0100.stl");
-    cargarSTL(2, loader, materialSTL, new THREE.Vector3(32, 0, 0), "/static/3dmodels/bases/BF3_module_c3_camp_bot_v0100.stl");
-    cargarSTL(3, loader, materialSTL, new THREE.Vector3(25, 0, 0), "/static/3dmodels/bases/BF3_module_c4_camp_top_v0100.stl");
-    cargarSTL(4, loader, materialSTL, new THREE.Vector3(15, 0, 0), "/static/3dmodels/bases/BF3_module_c5_camp_el_top_v0100.stl");
-    cargarSTL(5, loader, materialSTL, new THREE.Vector3(0, 0, 0), "/static/3dmodels/bases/BF3_module_c5_c_camp_el_top_v0100.stl");
-    cargarSTL(6, loader, materialSTL, new THREE.Vector3(-15, 0, 0), "/static/3dmodels/bases/BF3_module_f1_foot_v0100.stl");
-    cargarSTL(7, loader, materialSTL, new THREE.Vector3(-25, 0, 0), "/static/3dmodels/bases/BF3_module_f2_foot_v0100.stl");
-    cargarSTL(8, loader, materialSTL, new THREE.Vector3(-35, 0, 0), "/static/3dmodels/bases/BF3_module_f3_foot_v0100.stl");
-
-    //conexiones
-    cargarSTL(9, loader, materialSTL, new THREE.Vector3(50, 10, 0), "/static/3dmodels/conexiones/BF3_module_e2_elev_v0100.stl");
-    cargarSTL(10, loader, materialSTL, new THREE.Vector3(40, 13, 0), "/static/3dmodels/conexiones/BF3_module_e1_elev_v0100.stl");
-    cargarSTL(11, loader, materialSTL, new THREE.Vector3(20, 20, 0), "/static/3dmodels/conexiones/BF3_module_e1_c_elev_v0100.stl");
-    cargarSTL(12, loader, materialSTL, new THREE.Vector3(10, 20, 0), "/static/3dmodels/conexiones/BF3_module_c2_camp_out_R_v0100.stl");
-    cargarSTL(13, loader, materialSTL, new THREE.Vector3(0, 20, 0), "/static/3dmodels/conexiones/BF3_module_c2_camp_out_L_v0100.stl");
-    cargarSTL(14, loader, materialSTL, new THREE.Vector3(-10, 20, 0), "/static/3dmodels/conexiones/BF3_module_a1_angle_20_v0100.stl");
-    cargarSTL(15, loader, materialSTL, new THREE.Vector3(-20, 20, 0), "/static/3dmodels/conexiones/BF3_mod_c2f_camp_out_front_R_v0100.stl");
-    cargarSTL(16, loader, materialSTL, new THREE.Vector3(-30, 20, 0), "/static/3dmodels/conexiones/BF3_mod_c2_camp_out_08mm_R_v0100.stl");
-    cargarSTL(17, loader, materialSTL, new THREE.Vector3(-40, 20, 0), "/static/3dmodels/conexiones/BF3_mod_c2_camp_out_08mm_L_v0100.stl");
-    cargarSTL(18, loader, materialSTL, new THREE.Vector3(-50, 20, 0), "/static/3dmodels/conexiones/BF3_mod_c2bd_camp_out_back_doub_R_v0100.stl");
-    cargarSTL(19, loader, materialSTL, new THREE.Vector3(-60, 20, 0), "/static/3dmodels/conexiones/BF3_mod_c2bd_camp_out_back_doub_L_v0100.stl");
-    cargarSTL(20, loader, materialSTL, new THREE.Vector3(-70, 20, 0), "/static/3dmodels/conexiones/BF3_mod_c2b_camp_out_back_R_v0100.stl");
-    cargarSTL(21, loader, materialSTL, new THREE.Vector3(-80, 20, 0), "/static/3dmodels/conexiones/BF3_mod_c2b_camp_out_back_L_v0100.stl");
-
-    //modulos humedad  
-    cargarSTL(22, loader, materialSTL, new THREE.Vector3(-65, 0, 0), "/static/3dmodels/modulosHumedad/BF3_module_h1_hum_L_v0110.stl");
-    cargarSTL(23, loader, materialSTL, new THREE.Vector3(-50, 0, 0), "/static/3dmodels/modulosHumedad/BF3_module_h2_c_hum_L_v0110.stl");
-
-    //salasYAccesorios
-    cargarSTL(24, loader, materialSTL, new THREE.Vector3(50, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b1_c_room_v0100.stl");
-    cargarSTL(25, loader, materialSTL, new THREE.Vector3(15, -25, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b1_room_v0100.stl");
-    cargarSTL(26, loader, materialSTL, new THREE.Vector3(5, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_pal_15_C_v0100.stl");
 
 
-    cargarSTL(27, loader, materialSTL, new THREE.Vector3(-15, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_pal_15_L_v0100.stl");
-    cargarSTL(28, loader, materialSTL, new THREE.Vector3(-35, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_pal_15_R_v0100.stl");
-    cargarSTL(29, loader, materialSTL, new THREE.Vector3(-55, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_pal_C_v0100.stl");
-    cargarSTL(30, loader, materialSTL, new THREE.Vector3(-75, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_pal_L_v0110.stl");
-    cargarSTL(31, loader, materialSTL, new THREE.Vector3(-95, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_pal_R_v0110.stl");
-    cargarSTL(32, loader, materialSTL, new THREE.Vector3(75, -20, 0), "/static/3dmodels/salasYAccesorios/BF3_module_b2_room_h_v0100.stl");
-    //tapasCierre
-    cargarSTL(33, loader, materialSTL, new THREE.Vector3(-87, 20, 0), "/static/3dmodels/tapasCierre/BF3_module_c1_camp_L_v0100.stl");
-    cargarSTL(34, loader, materialSTL, new THREE.Vector3(-95, 20, 0), "/static/3dmodels/tapasCierre/BF3_module_c1_camp_R_v0100.stl");
-
-    //tuercas
-    cargarSTL(35, loader, materialSTL, new THREE.Vector3(10, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n1a_nut_A_type1_v0100.stl");
-    cargarSTL(36, loader, materialSTL, new THREE.Vector3(20, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n1b_nut_B_type1_v0100.stl");
-    cargarSTL(37, loader, materialSTL, new THREE.Vector3(0, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n2a_nut_A_type2_v0100.stl");
-    cargarSTL(38, loader, materialSTL, new THREE.Vector3(-10, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n2b_nut_B_type2_v0100.stl");
-    cargarSTL(39, loader, materialSTL, new THREE.Vector3(30, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n3a_nut_A_type3_v0100.stl");
-    cargarSTL(40, loader, materialSTL, new THREE.Vector3(40, -30, 0), "/static/3dmodels/tuercas/BF3_mod_n3b_nut_B_type3_v0100.stl");
-    */
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
         const width = canvas.clientWidth;
@@ -383,7 +373,7 @@ function main() {
                 transformControl.attach(object);
                 transformControl.setMode('scale');
                 $("#escaleObject").attr('class', 'de-escale');
-                
+
             } else {
 
                 deScaleMode();
@@ -392,6 +382,16 @@ function main() {
             }
         }
 
+
+    }
+
+    function clearInfoObject(){
+        elementInfo.text("");
+    }
+    function showInfoObject(idSelectedObject) {
+        var posObject = jQuery.inArray(idSelectedObject, idsObjects);
+        var classObject = dataObjects[posObject];
+        elementInfo.text(classObject.getInfo());
 
     }
 
