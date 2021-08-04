@@ -8,3 +8,4 @@ class Piece(models.Model):
     posY = models.IntegerField()
     tipo = models.CharField(max_length=200)
     id = models.IntegerField(primary_key=True)
+    image = models.CharField(max_length=200)

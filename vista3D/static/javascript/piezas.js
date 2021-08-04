@@ -30,13 +30,41 @@ function cargarSTL(position, loader, material, dataObject) {
         idsObjects[position] = modelo.id;
         dataObjects[position] = dataObject;
     });
+    
+}
+
+function createMenuOption(object){
+
+    console.log("#" + object.tipo);
+    var option = '<div id="' + object.id + '">';
+    option += '<img src="' + object.image + '">';
+    return option;
+}
+
+function createMenu(){
+    $("#menu").append('<div id="bases"></div>');
+    $("#menu").append('<div id="conexiones"></div>')
+    $("#menu").append('<div id="humedad"></div>')
+    $("#menu").append('<div id="salas"></div>')
+    $("#menu").append('<div id="cierres"></div>')
+    $("#menu").append('<div id="tuercas"></div>')
+    var divsMenu = new Array(numberObjects);
+    for(var i = 0; i < numberObjects; i++){
+        var stringDiv = createMenuOption(dataObjects[i]);
+        divsMenu[dataObjects[i].id] = [dataObjects[i].tipo, stringDiv];
+        console.log([dataObjects[i].tipo, stringDiv])
+    }
+    
+    
+
+    divsMenu.forEach(divs => $("#" + divs[0]).append(divs[1]));
+
+    
 }
 
 
-
-
 function main() {
-
+    
     const canvas = document.querySelector('canvas');
 
     const renderer = new THREE.WebGLRenderer({ canvas });
@@ -113,12 +141,12 @@ function main() {
         pickClicker(normalizedPosition, scene, camera, time) {
             if (this.isInside(normalizedPosition, scene, camera, time)) {
                 moveCameraToObject(this.pickedObject, camera);
+                createMenu();
             }
         }
         pickMouseOver(normalizedPosition, scene, camera, time) {
             if(idSelectedObject === -1 ){
                 if (this.isInside(normalizedPosition, scene, camera, time)) {
-                    console.log();
                     if(elementInfo.text() === ""){
                         showInfoObject(this.pickedObject.id)
                     }
@@ -142,6 +170,7 @@ function main() {
             this.posX = data[3];
             this.posY = data[4];
             this.tipo = data[5];
+            this.image = data[6]
         }
 
         getInfo() {
@@ -388,9 +417,13 @@ function main() {
     function clearInfoObject(){
         elementInfo.text("");
     }
+    function getObjectById(idObject){
+        var posObject = jQuery.inArray(idObject, idsObjects);
+        return dataObjects[posObject];
+    }
+
     function showInfoObject(idSelectedObject) {
-        var posObject = jQuery.inArray(idSelectedObject, idsObjects);
-        var classObject = dataObjects[posObject];
+        var classObject =  getObjectById(idSelectedObject);
         elementInfo.text(classObject.getInfo());
 
     }
@@ -428,6 +461,16 @@ function main() {
 
     $("#escaleObject").click(function () {
         scaleObject();
+    });
+    $('#download').click(function(e) {
+        if(idSelectedObject === -1){
+            window.location.href = '/static/3dmodels/modelos.zip';
+        }else{
+            var objectDownload = getObjectById(idSelectedObject);
+            alert(objectDownload.id);
+            window.location.href = objectDownload.nameFile ;
+        }
+        
     });
 
 
