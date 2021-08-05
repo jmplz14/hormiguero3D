@@ -13,15 +13,24 @@
 
 {% endblock %}
 {% block botonera %}
+<div id="buttons">
+    <input type="button" id="previous" value="Previous">
+    <input type="button" id="next" value="Next">
+    <input type="button" id="backHome" value="Back Home">
+    <input type="button" id="resetCamera" value="Reset Camera">
+    <input type="button" id="escaleObject" value="Escale">
+    <input type="button" id="download" value="Download">
+</div>
 
-<input type="button" id="previous" value="Previous">
-<input type="button" id="next" value="Next">
-<input type="button" id="backHome" value="Back Home">
-<input type="button" id="resetCamera" value="Reset Camera">
-<input type="button" id="escaleObject" value="Escale">
-<input type="button" id="download" value="Download">
 <p id="infoObject"></p>
 <div id="menu"></div>
+<div id="loadScreen">
+    <div class="spinner-border text-danger" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
+    <p id="loadPercentage"></p>
+</div>
+
 
 
 {% endblock %}

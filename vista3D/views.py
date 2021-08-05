@@ -12,10 +12,10 @@ def piezas(request):
     pieces = Piece.objects.all()
     pieces = list(pieces)
     array_pieces = []
+    
     for piece in pieces:
         datos = [piece.id, piece.name_file, piece.size, piece.posX, piece.posY, piece.tipo, piece.image]
-        
-
         array_pieces.append(datos)
+
     return render(request,'piezas.html', {'pieces': array_pieces})
 
