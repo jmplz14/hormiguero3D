@@ -79,8 +79,8 @@ class dataObject {
         var splitName = this.nameFile.split("/");
         var numSplit = splitName.length;
         var file = splitName[numSplit - 1];
-        var info = "Nombre: " + file + "</br> ";
-        info += "Tamaño: " + this.size;
+        var info = "Nombre: " + file + "\n";
+        info += "Tamaño: " + this.size + " mm";
         return info;
     }
 }
@@ -122,7 +122,8 @@ function getObjectById(idObject){
 
 function showInfoObject(idSelectedObject) {
     var classObject =  getObjectById(idSelectedObject);
-    elementInfo.text(classObject.getInfo());
+    var obj = elementInfo.text(classObject.getInfo());
+    obj.html(obj.html().replace(/\n/g,'<br/>'));
 
 }
 function getCanvasRelativePosition(event) {
@@ -395,7 +396,7 @@ function resetCameraPosition() {
 
 function deScaleMode() {
     if (transformControl.object !== undefined) {
-        $("#escaleObject").attr('class', 'escale');
+       
 
         transformControl.object.scale.set(vectorScaleInit.x, vectorScaleInit.y, vectorScaleInit.z);
         transformControl.detach();
@@ -411,7 +412,7 @@ function scaleObject() {
             var object = scene.getObjectById(idSelectedObject, true);
             transformControl.attach(object);
             transformControl.setMode('scale');
-            $("#escaleObject").attr('class', 'de-escale');
+           
 
         } else {
 

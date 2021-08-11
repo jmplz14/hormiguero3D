@@ -7,6 +7,47 @@ canvas {
     height: 100%;
     display: block;
   }
+
 #buttons{
   visibility: hidden;
+  width: 100%;
+  border: 1px;
+  text-align:center;
+  padding-bottom: 1%;
+}
+
+
+#divCanvas{
+  position:relative;
+}
+#infoObject{
+  position:absolute; 
+  left:50px;
+  top:20px;
+}
+#loadScreen{
+  position:absolute; 
+  left:45%;
+  top:45%;
+}
+
+.btn-circle.btn-md {
+  width: 40px;
+  height: 40px;
+  padding: 0px;
+  border-radius: 25px !important;
+  font-size: 25px;
+  text-align: center;
+}
+
+.btn:focus{
+    box-shadow: none!important;
+    outline: 0;
+}
+
+
+.btn:active{
+  background-color: #AD3664 !important;
+  border-color: black !important;
+  color: #000000 !important;
 }

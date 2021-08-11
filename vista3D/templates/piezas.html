@@ -3,6 +3,8 @@
 
 
 {% block scripts %}
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <script type="text/javascript">
     var objects = {{ pieces| safe}};
 </script>
@@ -13,23 +15,28 @@
 
 {% endblock %}
 {% block botonera %}
-<div id="buttons">
-    <input type="button" id="previous" value="Previous">
-    <input type="button" id="next" value="Next">
-    <input type="button" id="backHome" value="Back Home">
-    <input type="button" id="resetCamera" value="Reset Camera">
-    <input type="button" id="escaleObject" value="Escale">
-    <input type="button" id="download" value="Download">
-</div>
-
 <p id="infoObject"></p>
-<div id="menu"></div>
 <div id="loadScreen">
     <div class="spinner-border text-danger" role="status">
         <span class="sr-only">Loading...</span>
     </div>
-    <p id="loadPercentage"></p>
+    <p id="loadPercentage">0%</p>
 </div>
+<div id="buttons">
+
+
+    
+    <input type="button" title="Previous object" id="previous" class="btn btn-danger btn-circle btn-md" value="&lt;">
+    <button title="Return to view of all objects " class="btn btn-danger btn-circle btn-md" id="backHome" ><span class="material-icons">home</span></button>
+    <button id="resetCamera" title="Reset camera to init" class="btn btn-danger btn-circle btn-md"><span class="material-icons">flip_camera_ios</span></button>
+    <button title="Escale object" id="escaleObject" class="btn btn-danger btn-circle btn-md" ><span class="material-icons">aspect_ratio</span></button>
+    <button id="download" title="Download all stl files" class="btn btn-danger btn-circle btn-md"><span class="material-icons">file_download</span></button>
+    <input type="button" title="Next object" id="next" class="btn btn-danger btn-circle btn-md" value="&gt;">
+</div>
+
+
+<div id="menu"></div>
+
 
 
 
