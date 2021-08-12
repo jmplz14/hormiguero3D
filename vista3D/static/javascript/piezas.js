@@ -103,6 +103,7 @@ let dataObjects = new Array(numberObjects);
 //modelos de threejs. Tienen el mismo orden que idsObjects
 let modelObjects = new Array(numberObjects);
 let elementInfo = $("#infoObject");
+let divMenu = $('#accordion');
 let numberObjectsLoad = 0;
 const canvas = document.querySelector('canvas');
 const renderer = new THREE.WebGLRenderer({ canvas });
@@ -243,13 +244,27 @@ function createDivMenu(div){
     });
 
 }
+function createCardMenu(id){
+    var divCard = '<div class="card">\n';
+        divCard += '<div class="card-header">\n';
+    divCard += '<a class="card-link" data-toggle="collapse" href="#collapse'+id+'">'+ id +'</a>';
+    divCard += '\n</div>'
+    divCard += '<div id="collapse'+id+'" class="collapse show" >'
+        divCard += '<div id="' + id + '" class="card-body">'; 
+        divCard += '</div>'
+    divCard += '</div>';
+    divCard += '</div>';
+    console.log(divCard)
+    return divCard;
+}
 function createMenu(){
-    $("#menu").append('<div id="bases"></div>');
-    $("#menu").append('<div id="conexiones"></div>')
-    $("#menu").append('<div id="humedad"></div>')
-    $("#menu").append('<div id="salas"></div>')
-    $("#menu").append('<div id="cierres"></div>')
-    $("#menu").append('<div id="tuercas"></div>')
+
+    divMenu.append(createCardMenu('bases'));
+    divMenu.append(createCardMenu('conexiones'));
+    divMenu.append(createCardMenu('humedad'));
+    divMenu.append(createCardMenu('salas'));
+    divMenu.append(createCardMenu('cierres'));
+    divMenu.append(createCardMenu('tuercas'));
     var divsMenu = new Array(numberObjects);
     for(var i = 0; i < numberObjects; i++){
         var stringDiv = createMenuOption(dataObjects[i]);
@@ -259,7 +274,6 @@ function createMenu(){
     
 
     divsMenu.forEach(div => createDivMenu(div));
-
     
 }
 
@@ -476,10 +490,10 @@ function objectButton(){
     $("#escaleObject").show();  
 }
 function hideMenu(){
-    $('#menu').hide();
+    divMenu.hide();
 }
 function showMenu(){
-    $('#menu').show();
+    divMenu.show();
 }
 
 function main() {

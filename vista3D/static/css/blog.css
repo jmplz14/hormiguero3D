@@ -1,14 +1,19 @@
 html, body {
-    height: 100%;
+  overscroll-behavior: none;
     margin: 0;
   }
+#divCanvas{
+  margin:0;
+}
 canvas {
     width: 100%;
-    height: 100%;
+    height: 60%;
     display: block;
   }
 
 #buttons{
+  position: relative;
+  margin-top: -45px;
   visibility: hidden;
   width: 100%;
   border: 1px;
@@ -19,16 +24,47 @@ canvas {
 
 #divCanvas{
   position:relative;
+
 }
 #infoObject{
   position:absolute; 
-  left:50px;
-  top:20px;
+  left:45px;
+  top:45px;
 }
+
+
 #loadScreen{
   position:absolute; 
   left:45%;
   top:45%;
+}
+
+#accordion{
+  width: 17%;
+  margin-top: 2%;
+  max-height: 85%;
+  height:85%;
+  overflow-y: scroll;
+  left:83%;
+  position: absolute;
+  display: inline-block;
+  
+}
+.card-header{
+  background-color: #dc3545 !important;
+}
+a {
+  text-decoration: none;
+}
+a:link, a:visited {
+  color: white;
+}
+
+img {
+  width: 100%;
+}
+.collapse{
+  text-align: center;
 }
 
 .btn-circle.btn-md {
@@ -50,4 +86,7 @@ canvas {
   background-color: #AD3664 !important;
   border-color: black !important;
   color: #000000 !important;
+}
+.card_header{
+  background-color: 
 }
