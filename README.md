@@ -6,9 +6,13 @@ Con esta aplicación solo busco tener una forma de ver mejor las piezas y poder 
 
 ## Herramientas Utilizadas. 
  [Three.js](https://threejs.org/): Esta librería se encargara de cargar todos los ficheros stl y visualizar todas las partes 3d del proyecto. También nos dará las opciones para poder interactuar con ellos. 
-[Django]: En la parte del servido utilizaremos django al estar familiarizado ya con su uso.
-[Postgress]: En este caso la base de datos solo almacenara los datos de las piezas (Nombre fichero, tamaño y imagen).
-[Docker]: Sera el encargado de desplegar los contenedores para la web y la base de datos.
+
+Django: En la parte del servido utilizaremos django al estar familiarizado ya con su uso.
+
+Postgress: En este caso la base de datos solo almacenara los datos de las piezas (Nombre fichero, tamaño y imagen).
+
+Docker: Sera el encargado de desplegar los contenedores para la web y la base de datos.
+
 Después para realizar la aplicación web se utilizara como es lógico css, html y javascript. 
 
 ## Funcionalidad de la aplicación
