@@ -8,7 +8,6 @@ urlpatterns = [
 
     path('piezas/', views.piezas, name='piezas'),
 
-    path('', views.index, name='index')
+    path('', views.piezas, name='piezas')
     
-    #path('index/', views.index, name='main-view')
 ]
