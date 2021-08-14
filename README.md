@@ -29,7 +29,7 @@ También mostramos la información de las piezas por las que pasamos el ratón e
 
 https://user-images.githubusercontent.com/26877681/129450936-9dfb470b-6b86-42cb-b950-1c46d4a4b36e.mp4
 
-Con esto tenemos explicada toda la función del menu inicial de la aplicación. Nos queda la parte que nos muestra las piezas de una forma más detallada y individual. Para esto solo tenemos que hacer doble click en una de las piezas y nos llevara a la vista individual. En la esquina superior izquierda se mostrara la información de la pieza que estamos observando. 
+Con esto tenemos explicada toda la función del menu inicial de la aplicación. Nos queda la parte que nos muestra las piezas de una forma más detallada y individual. Para esto solo tenemos que hacer doble click en una de las piezas y nos llevara a la vista individual. En la esquina superior izquierda se mostrara la información de la pieza que estamos observando. En el mismo video vemos como pulsando el boton de home volveriamos a la vista de todas las piezas juntas.
 
 https://user-images.githubusercontent.com/26877681/129450941-a04a2778-df7c-4cd9-80d4-425ddc0e73df.mp4
 
